@@ -12,6 +12,7 @@ import {
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { TaskStats } from '../../types/task';
 
+// Register chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -28,18 +29,19 @@ interface ProgressChartProps {
 }
 
 export const ProgressChart: React.FC<ProgressChartProps> = ({ stats, type }) => {
+  // Handle bar chart
   if (type === 'bar') {
-    const data = {
+    const barData = {
       labels: ['Code Tasks', 'Learning', 'Relationships', 'Self Dev', 'Projects'],
       datasets: [
         {
           label: 'Tasks',
           data: [
-            stats.byCategory['code-tasks'],
-            stats.byCategory['learning'],
-            stats.byCategory['relationship'],
-            stats.byCategory['self-development'],
-            stats.byCategory['project-improvement'],
+            stats.byCategory['code-tasks'] || 0,
+            stats.byCategory['learning'] || 0,
+            stats.byCategory['relationship'] || 0,
+            stats.byCategory['self-development'] || 0,
+            stats.byCategory['project-improvement'] || 0,
           ],
           backgroundColor: [
             'rgba(59, 130, 246, 0.8)',
@@ -60,7 +62,7 @@ export const ProgressChart: React.FC<ProgressChartProps> = ({ stats, type }) => 
       ],
     };
 
-    const options = {
+    const barOptions = {
       responsive: true,
       plugins: {
         legend: {
@@ -82,18 +84,24 @@ export const ProgressChart: React.FC<ProgressChartProps> = ({ stats, type }) => 
       },
     };
 
-    return <Bar data={data} options={options} />;
+    return <Bar data={barData} options={barOptions} />;
   }
 
-  const data = {
+  // Handle doughnut chart
+  const completed = stats.completed || 0;
+  const inProgress = stats.inProgress || 0;
+  const total = stats.total || 0;
+  const todo = Math.max(total - completed - inProgress, 0);
+
+  const doughnutData = {
     labels: ['Completed', 'In Progress', 'Todo'],
     datasets: [
       {
-        data: [stats.completed, stats.inProgress, stats.total - stats.completed - stats.inProgress],
+        data: [completed, inProgress, todo],
         backgroundColor: [
-          'rgba(16, 185, 129, 0.8)',
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(156, 163, 175, 0.8)',
+          'rgba(16, 185, 129, 0.8)', // green
+          'rgba(59, 130, 246, 0.8)', // blue
+          'rgba(156, 163, 175, 0.8)', // gray
         ],
         borderColor: [
           'rgba(16, 185, 129, 1)',
@@ -105,7 +113,7 @@ export const ProgressChart: React.FC<ProgressChartProps> = ({ stats, type }) => 
     ],
   };
 
-  const options = {
+  const doughnutOptions = {
     responsive: true,
     plugins: {
       legend: {
@@ -122,5 +130,5 @@ export const ProgressChart: React.FC<ProgressChartProps> = ({ stats, type }) => 
     },
   };
 
-  return <Doughnut data={data} options={options} />;
+  return <Doughnut data={doughnutData} options={doughnutOptions} />;
 };
